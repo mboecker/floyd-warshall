@@ -1,0 +1,1 @@
+This is currently a placeholder crate, but will contain an efficient implementation of the floyd-warshall algorithm to solve the APAS (all pairs shortest paths) problem using the petgraph library.
