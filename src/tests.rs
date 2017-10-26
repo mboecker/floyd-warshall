@@ -27,9 +27,9 @@ fn test_no_intermediate() {
     for i in 0..4 {
         for j in 0..4 {
             if i == j {
-                assert_eq!(m.get(i, j), 0);
+                assert_eq!(m.get_path_len(i, j), 0);
             } else {
-                assert_eq!(m.get(i, j), 1);
+                assert_eq!(m.get_path_len(i, j), 1);
             }
         }
     }
@@ -49,13 +49,13 @@ fn test_intermediate() {
     let m = floyd_warshall(&graph);
     println!("{:?}", m);
 
-    assert_eq!(m.get(0, 0), 0);
-    assert_eq!(m.get(1, 1), 0);
-    assert_eq!(m.get(2, 2), 0);
+    assert_eq!(m.get_path_len(0, 0), 0);
+    assert_eq!(m.get_path_len(1, 1), 0);
+    assert_eq!(m.get_path_len(2, 2), 0);
 
-    assert_eq!(m.get(0, 1), 1);
-    assert_eq!(m.get(1, 2), 1);
-    assert_eq!(m.get(0, 2), 2);
+    assert_eq!(m.get_path_len(0, 1), 1);
+    assert_eq!(m.get_path_len(1, 2), 1);
+    assert_eq!(m.get_path_len(0, 2), 2);
 }
 
 #[test]
@@ -98,9 +98,9 @@ fn test_random() {
         let i: usize = read!();
         let j: usize = read!();
 
-        if m.path_exists(i, j) {
+        if m.does_path_exist(i, j) {
 
-            let len = m.get(i, j);
+            let len = m.get_path_len(i, j);
             let path = m.get_path_iter(i, j);
 
             let path: Vec<&usize> = if i > j {

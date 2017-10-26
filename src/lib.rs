@@ -49,7 +49,7 @@ where
     // Each node has a distance of 0 to itself.
     for k in g.node_identifiers() {
         let k = k.index();
-        m.set(k, k, 0);
+        m.set_path_len(k, k, 0);
     }
 
     // Update the matrix to represent the actual edges in the graph.
@@ -57,7 +57,7 @@ where
         let n1 = e.source().index();
         let n2 = e.target().index();
         let w = e.weight();
-        m.set(n1, n2, *w);
+        m.set_path_len(n1, n2, *w);
     }
 
     // k is the "intermediate" node which is currently considered.
@@ -88,29 +88,47 @@ where
                 }
 
                 // These are the two options in this round to reach from node 1 to node 2.
-                let v1 = m.get(n1, n2);
-                let v2 = m.get(n1, k).saturating_add(m.get(k, n2));
+                let mut v1 = None;
+                if m.does_path_exist(n1, n2) {
+                    v1 = Some(m.get_path_len(n1, n2));
+                }
 
+                let v2_exists = m.does_path_exist(n1, k);
+                let v2_exists = v2_exists && m.does_path_exist(k, n2);
+
+                let mut v2 = None;
+                if v2_exists {
+                    let part1 = m.get_path_len(n1, k);
+                    let part2 = m.get_path_len(k, n2);
+                    v2 = Some(part1.saturating_add(part2));
+                }
 
                 // Whichever of these is minimal, can be used to reach from node 1 to node 2.
-                if v2 < v1 {
-                    // Update the matrix to the minimum of these two.
-                    m.set(n1, n2, v2);
+                if v2.is_some() && (v1.is_none() || v2.unwrap() < v1.unwrap()) {
+                    let v2 = v2.unwrap();
 
+                    // Update the matrix to the minimum of these two.
+                    m.set_path_len(n1, n2, v2);
+
+                    // TODO: reuse vector here.
                     let mut v: Vec<usize> = Vec::new();
 
+                    // Reverse path, if n1 < k or k < n2 not fulfilled:
                     if n1 <= k {
                         v.extend(m.get_path_iter(n1, k));
                     } else {
                         v.extend(m.get_path_iter(n1, k).rev());
                     }
+
                     v.push(*kw);
+
                     if k <= n2 {
                         v.extend(m.get_path_iter(k, n2));
                     } else {
                         v.extend(m.get_path_iter(k, n2).rev());
                     }
 
+                    // Save the path.
                     m.get_path_mut(n1, n2).set_vector(v);
                 }
             }
