@@ -12,3 +12,6 @@ license = "MIT"
 
 [dependencies]
 petgraph = "0.4.10"
+
+[dev-dependencies]
+rand = "*"
