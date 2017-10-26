@@ -59,6 +59,7 @@ fn test_intermediate() {
 }
 
 #[test]
+#[ignore]
 fn test_random() {
     use petgraph::Graph;
     use rand;
@@ -84,12 +85,34 @@ fn test_random() {
     let m = floyd_warshall(&graph);
     println!("{:?}", m);
 
-    // use petgraph::dot::Dot;
-    // use std::fs::File;
-    // use std::io::prelude::*;
+    use petgraph::dot::Dot;
+    use std::fs::File;
+    use std::io::prelude::*;
 
-    // let mut file = File::create("random.dot").unwrap();
-    // let b = format!("{:?}", Dot::new(&graph));
-    // let b = b.as_bytes();
-    // file.write_all(b);
+    let mut file = File::create("random.dot").unwrap();
+    let b = format!("{:?}", Dot::new(&graph));
+    let b = b.as_bytes();
+    file.write_all(b);
+
+    loop {
+        let i: usize = read!();
+        let j: usize = read!();
+
+        if m.path_exists(i, j) {
+
+            let len = m.get(i, j);
+            let path = m.get_path_iter(i, j);
+
+            let path: Vec<&usize> = if i > j {
+                path.rev().collect()
+            } else {
+                path.collect()
+            };
+
+            println!("The path from {} to {} has total length {}.", i, j, len);
+            println!("Path: {:?}", path);
+        } else {
+            println!("There is no path from {} to {}.", i, j)
+        }
+    }
 }
