@@ -92,7 +92,7 @@ fn test_random() {
     let mut file = File::create("random.dot").unwrap();
     let b = format!("{:?}", Dot::new(&graph));
     let b = b.as_bytes();
-    file.write_all(b);
+    file.write_all(b).unwrap();
 
     loop {
         let i: usize = read!();

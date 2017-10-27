@@ -1,6 +1,6 @@
 use std::fmt;
 
-/// This represents a sequence of nodes.
+/// This represents a sequence of nodes. The length is also saved, and when ```exists = false```, this means "there is no path".
 #[derive(Clone, Debug)]
 pub struct Path<T> {
     v: Vec<T>,
@@ -16,24 +16,29 @@ where
         self.v = t
     }
 
+    /// Returns the intermediate nodes on this path as a slice.
     pub fn get_slice<'a>(&'a self) -> &'a [T] {
         &self.v
     }
 
+    /// Returns an iterator of the intermediat enodes on this path.
     pub fn iter<'a>(&'a self) -> impl DoubleEndedIterator<Item = &'a T> {
         self.v.iter()
     }
 
+    /// Returns the length of this path.
     pub fn len(&self) -> usize {
         assert!(self.exists);
         self.len
     }
 
+    /// Updates the length of this path. Also removes the "there is not path here"-flag.
     pub(crate) fn set_len(&mut self, v: usize) {
         self.len = v;
         self.exists = true;
     }
 
+    /// Has this path finite length?
     pub fn exists(&self) -> bool {
         self.exists
     }
@@ -56,14 +61,16 @@ impl<T> Default for Path<T> {
     }
 }
 
-/// This matrix is a solution to the APSP problem, calculated by the Floyd-Warshall algorithm. It contains the intermediate nodes on the shortest path between every two nodes.
+/// This matrix is a solution to the APSP problem, calculated by the Floyd-Warshall algorithm.
+/// It contains the intermediate nodes on the shortest path between every two nodes.
 pub struct PathMatrix {
     m: Box<[Path<usize>]>,
     n: usize,
 }
 
 impl PathMatrix {
-    /// Creates a new ```PathMatrix``` with the given dimension (n * n).
+    /// Creates a new ```PathMatrix``` with the given dimension (n * n), where no paths were found yet.
+    /// That means, no nodes are yet connected in this matrix.
     pub fn new(n: usize) -> PathMatrix {
         let m = vec![Path::default(); n * n].into();
         PathMatrix { m, n }
@@ -71,7 +78,8 @@ impl PathMatrix {
 
     /// This method computes the "inner index" into the ```Vec``` by using the given X-Y-coordinates into the matrix.
     fn idx(&self, mut i: usize, mut j: usize) -> usize {
-        // We only fill one half of the matrix.
+        // Because we're only supporting undirected graphs and we only fill one half of the matrix,
+        // we can swap the two indices, so that i <= j.
         if i > j {
             ::std::mem::swap(&mut i, &mut j);
         }
@@ -102,11 +110,13 @@ impl PathMatrix {
         self.m[idx].iter()
     }
 
+    /// If the matrix contains a path between i and j (which means, it has a set length), this returns true.
     pub fn does_path_exist(&self, i: usize, j: usize) -> bool {
         let idx = self.idx(i, j);
         self.m[idx].exists()
     }
 
+    /// Returns a mutable reference to the path object for the two given nodes.
     pub(crate) fn get_path_mut(&mut self, i: usize, j: usize) -> &mut Path<usize> {
         let idx = self.idx(i, j);
         &mut self.m[idx]

@@ -16,7 +16,7 @@ extern crate text_io;
 mod tests;
 
 mod matrices;
-use matrices::*;
+pub use matrices::*;
 
 use petgraph::graph::NodeIndex;
 use petgraph::visit::NodeRef;
@@ -30,7 +30,7 @@ use petgraph::visit::EdgeRef;
 use petgraph::visit::GraphProp;
 
 /// This function computes a distance matrix containing the shortest paths between every two nodes in the graph.
-/// By using the Floyd-Warshall algorithm, this is computed in **O(V^3)** runtime.
+/// By using the Floyd-Warshall algorithm, this is computed in **O(V^(3))** runtime.
 pub fn floyd_warshall<G>(g: G) -> PathMatrix
 where
     G: Data<EdgeWeight = usize, NodeWeight = usize>
@@ -87,12 +87,14 @@ where
                     continue;
                 }
 
-                // These are the two options in this round to reach from node 1 to node 2.
+                // These are the two options in this round to reach from node 1 to node 2:
+                // - v1, which is (if it exists) the saved path from n1 to n2, which is eiter a direct edge or a path using any intermediate nodes less than k.
                 let mut v1 = None;
                 if m.does_path_exist(n1, n2) {
                     v1 = Some(m.get_path_len(n1, n2));
                 }
 
+                // - v2, which is the path from node 1 to node k to node 2 (if such a path exists, which means, that k is reachable from n1 and n2 is reachable from k).
                 let v2_exists = m.does_path_exist(n1, k);
                 let v2_exists = v2_exists && m.does_path_exist(k, n2);
 
@@ -100,6 +102,9 @@ where
                 if v2_exists {
                     let part1 = m.get_path_len(n1, k);
                     let part2 = m.get_path_len(k, n2);
+
+                    // .saturating_add is a relict of a time, when a path was usize::MAX as a sign for "there is no path here".
+                    // But as any other .add doesn't make any more sense, it will stay.
                     v2 = Some(part1.saturating_add(part2));
                 }
 
@@ -120,6 +125,7 @@ where
                         v.extend(m.get_path_iter(n1, k).rev());
                     }
 
+                    // Push k in the middle of the path here.
                     v.push(*kw);
 
                     if k <= n2 {
@@ -128,7 +134,7 @@ where
                         v.extend(m.get_path_iter(k, n2).rev());
                     }
 
-                    // Save the path.
+                    // Save the path as new optimal path from node 1 to node 2.
                     m.get_path_mut(n1, n2).set_vector(v);
                 }
             }
