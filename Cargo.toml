@@ -14,5 +14,5 @@ license = "MIT"
 petgraph = "0.4.10"
 
 [dev-dependencies]
-rand = "*"
-text_io = "*"
+rand = "0.3.17"
+text_io = "0.1.6"
