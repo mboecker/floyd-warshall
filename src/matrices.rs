@@ -1,4 +1,5 @@
 use std::fmt;
+use std::fmt::Debug;
 
 /// This represents a sequence of nodes. The length is also saved, and when ```exists = false```, this means "there is no path".
 #[derive(Clone, Debug)]
@@ -8,10 +9,7 @@ pub struct Path<T> {
     exists: bool,
 }
 
-impl<T> Path<T>
-where
-    T: Clone,
-{
+impl<T> Path<T> {
     pub(crate) fn set_vector(&mut self, t: Vec<T>) {
         self.v = t
     }
@@ -63,16 +61,23 @@ impl<T> Default for Path<T> {
 
 /// This matrix is a solution to the APSP problem, calculated by the Floyd-Warshall algorithm.
 /// It contains the intermediate nodes on the shortest path between every two nodes.
-pub struct PathMatrix {
-    m: Box<[Path<usize>]>,
+pub struct PathMatrix<T> {
+    m: Box<[Path<T>]>,
     n: usize,
 }
 
-impl PathMatrix {
+impl<T> PathMatrix<T> {
     /// Creates a new ```PathMatrix``` with the given dimension (n * n), where no paths were found yet.
     /// That means, no nodes are yet connected in this matrix.
-    pub fn new(n: usize) -> PathMatrix {
-        let m = vec![Path::default(); n * n].into();
+    pub fn new(n: usize) -> PathMatrix<T> {
+        let mut m = vec![];
+
+        for _ in 0..n * n {
+            m.push(Path::default());
+        }
+
+        let m = m.into();
+
         PathMatrix { m, n }
     }
 
@@ -95,7 +100,7 @@ impl PathMatrix {
     }
 
     /// This method returns the shortest path possible between i and i.
-    pub fn get_path(&self, i: usize, j: usize) -> &Path<usize> {
+    pub fn get_path(&self, i: usize, j: usize) -> &Path<T> {
         let idx = self.idx(i, j);
         &self.m[idx]
     }
@@ -105,7 +110,7 @@ impl PathMatrix {
         &'a self,
         i: usize,
         j: usize,
-    ) -> impl DoubleEndedIterator<Item = &'a usize> {
+    ) -> impl DoubleEndedIterator<Item = &'a T> {
         let idx = self.idx(i, j);
         self.m[idx].iter()
     }
@@ -117,7 +122,7 @@ impl PathMatrix {
     }
 
     /// Returns a mutable reference to the path object for the two given nodes.
-    pub(crate) fn get_path_mut(&mut self, i: usize, j: usize) -> &mut Path<usize> {
+    pub(crate) fn get_path_mut(&mut self, i: usize, j: usize) -> &mut Path<T> {
         let idx = self.idx(i, j);
         &mut self.m[idx]
     }
@@ -129,7 +134,10 @@ impl PathMatrix {
     }
 }
 
-impl fmt::Debug for PathMatrix {
+impl<T> Debug for PathMatrix<T>
+where
+    T: Debug,
+{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use std::result::Result;
 

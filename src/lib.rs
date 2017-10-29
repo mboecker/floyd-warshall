@@ -31,15 +31,16 @@ use petgraph::visit::GraphProp;
 
 /// This function computes a distance matrix containing the shortest paths between every two nodes in the graph.
 /// By using the Floyd-Warshall algorithm, this is computed in **O(V^(3))** runtime.
-pub fn floyd_warshall<G>(g: G) -> PathMatrix
+pub fn floyd_warshall<G>(g: G) -> PathMatrix<G::NodeWeight>
 where
-    G: Data<EdgeWeight = usize, NodeWeight = usize>
+    G: Data<EdgeWeight = usize>
         + GraphBase<NodeId = NodeIndex>
         + NodeCount
         + IntoNodeIdentifiers<NodeId = NodeIndex>
         + IntoNodeReferences
         + IntoEdgeReferences
         + GraphProp,
+    G::NodeWeight: Clone,
 {
     // We currently only support directed graphs.
     assert!(!g.is_directed());
@@ -116,22 +117,22 @@ where
                     m.set_path_len(n1, n2, v2);
 
                     // TODO: reuse vector here.
-                    let mut v: Vec<usize> = Vec::new();
+                    let mut v: Vec<G::NodeWeight> = Vec::new();
 
                     // Reverse path, if n1 < k or k < n2 not fulfilled:
                     if n1 <= k {
-                        v.extend(m.get_path_iter(n1, k));
+                        v.extend(m.get_path_iter(n1, k).cloned());
                     } else {
-                        v.extend(m.get_path_iter(n1, k).rev());
+                        v.extend(m.get_path_iter(n1, k).rev().cloned());
                     }
 
                     // Push k in the middle of the path here.
-                    v.push(*kw);
+                    v.push(kw.clone());
 
                     if k <= n2 {
-                        v.extend(m.get_path_iter(k, n2));
+                        v.extend(m.get_path_iter(k, n2).cloned());
                     } else {
-                        v.extend(m.get_path_iter(k, n2).rev());
+                        v.extend(m.get_path_iter(k, n2).rev().cloned());
                     }
 
                     // Save the path as new optimal path from node 1 to node 2.
