@@ -12,12 +12,12 @@ fn test_no_intermediate() {
 
     graph.extend_with_edges(
         &[
-            (a, b, 1),
-            (a, c, 1),
-            (a, d, 1),
-            (b, c, 1),
-            (b, d, 1),
-            (c, d, 1),
+            (a, b, 1usize),
+            (a, c, 1usize),
+            (a, d, 1usize),
+            (b, c, 1usize),
+            (b, d, 1usize),
+            (c, d, 1usize),
         ],
     );
 
@@ -44,7 +44,7 @@ fn test_intermediate() {
     let b = graph.add_node(1);
     let c = graph.add_node(2);
 
-    graph.extend_with_edges(&[(a, b, 1), (b, c, 1), (a, c, 3)]);
+    graph.extend_with_edges(&[(a, b, 1usize), (b, c, 1), (a, c, 3)]);
 
     let m = floyd_warshall(&graph);
     println!("{:?}", m);

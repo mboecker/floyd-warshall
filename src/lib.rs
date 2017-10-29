@@ -33,7 +33,7 @@ use petgraph::visit::GraphProp;
 /// By using the Floyd-Warshall algorithm, this is computed in **O(V^(3))** runtime.
 pub fn floyd_warshall<G>(g: G) -> PathMatrix<G::NodeWeight>
 where
-    G: Data<EdgeWeight = usize>
+    G: Data
         + GraphBase<NodeId = NodeIndex>
         + NodeCount
         + IntoNodeIdentifiers<NodeId = NodeIndex>
@@ -41,6 +41,7 @@ where
         + IntoEdgeReferences
         + GraphProp,
     G::NodeWeight: Clone,
+    G::EdgeWeight: Clone + Into<usize>,
 {
     // We currently only support directed graphs.
     assert!(!g.is_directed());
@@ -57,8 +58,9 @@ where
     for e in g.edge_references() {
         let n1 = e.source().index();
         let n2 = e.target().index();
-        let w = e.weight();
-        m.set_path_len(n1, n2, *w);
+        let w: G::EdgeWeight = e.weight().clone();
+        let w: usize = w.into();
+        m.set_path_len(n1, n2, w);
     }
 
     // k is the "intermediate" node which is currently considered.
