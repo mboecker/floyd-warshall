@@ -1,6 +1,3 @@
-use std::fmt;
-use std::fmt::Debug;
-
 /// This represents a sequence of nodes. The length is also saved, and when ```exists = false```, this means "there is no path".
 #[derive(Clone, Debug)]
 pub struct Path<T> {
@@ -95,13 +92,14 @@ impl<T> PathMatrix<T> {
         if i == j {
             0
         } else {
-            // i + self.n * j // This is for the old n x n matrix.
-            // j + k + i
             if j < 3 {
                 j + i
             } else {
+                let g = 1 + (j - 2) * (j - 1) / 2;
+
                 let k = j - 1;
-                self.idx(0, j - 1) + k + i
+                
+                g + k + i
             }
         }
     }
@@ -215,3 +213,40 @@ impl<T> PathMatrix<T> {
 //         Result::Ok(())
 //     }
 // }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_indices() {
+        use PathMatrix;
+        let m: PathMatrix<()> = PathMatrix::new(100);
+
+        fn idx_recur(mut i: usize, mut j: usize) -> usize {
+            // Because we're only supporting undirected graphs and we only fill one half of the matrix,
+            // we can swap the two indices, so that i <= j.
+            if i > j {
+                ::std::mem::swap(&mut i, &mut j);
+            }
+            assert!(i <= j);
+
+            if i == j {
+                0
+            } else {
+                // i + self.n * j // This is for the old n x n matrix.
+                // j + k + i
+                if j < 3 {
+                    j + i
+                } else {
+                    let k = j - 1;
+                    idx_recur(0, j - 1) + k + i
+                }
+            }
+        }
+
+        for i in 0..100 {
+            for j in 0..100 {
+                assert_eq!(idx_recur(i, j), m.idx(i, j));
+            }
+        }
+    }
+}
