@@ -1,6 +1,6 @@
 [package]
 name = "floyd-warshall"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Marvin Böcker <marvin.boecker@tu-dortmund.de>"]
 
 description = "Efficient all-pairs-shortest-paths algorithm for the petgraph library using the floyd-warshall algorithm."
