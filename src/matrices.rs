@@ -7,32 +7,38 @@ pub struct Path<T> {
 }
 
 impl<T> Path<T> {
+    #[inline]
     pub(crate) fn set_vector(&mut self, t: Vec<T>) {
         self.v = t
     }
 
+    #[inline]
     /// Returns the intermediate nodes on this path as a slice.
     pub fn get_slice<'a>(&'a self) -> &'a [T] {
         &self.v
     }
 
+    #[inline]
     /// Returns an iterator of the intermediat enodes on this path.
     pub fn iter<'a>(&'a self) -> impl DoubleEndedIterator<Item = &'a T> {
         self.v.iter()
     }
 
+    #[inline]
     /// Returns the length of this path.
     pub fn len(&self) -> usize {
         assert!(self.exists);
         self.len
     }
 
+    #[inline]
     /// Updates the length of this path. Also removes the "there is not path here"-flag.
     pub(crate) fn set_len(&mut self, v: usize) {
         self.len = v;
         self.exists = true;
     }
 
+    #[inline]
     /// Has this path finite length?
     pub fn exists(&self) -> bool {
         self.exists
@@ -40,12 +46,14 @@ impl<T> Path<T> {
 }
 
 impl<T> AsRef<Vec<T>> for Path<T> {
+    #[inline]
     fn as_ref(&self) -> &Vec<T> {
         &self.v
     }
 }
 
 impl<T> Default for Path<T> {
+    #[inline]
     fn default() -> Self {
         use std::usize::MAX;
         Path {
@@ -81,6 +89,7 @@ impl<T> PathMatrix<T> {
     }
 
     /// This method computes the "inner index" into the ```Vec``` by using the given X-Y-coordinates into the matrix.
+    #[inline]
     fn idx(&self, mut i: usize, mut j: usize) -> usize {
         // Because we're only supporting undirected graphs and we only fill one half of the matrix,
         // we can swap the two indices, so that i <= j.
@@ -105,18 +114,21 @@ impl<T> PathMatrix<T> {
     }
 
     /// This method returns the value at the given position.
+    #[inline]
     pub fn get_path_len(&self, i: usize, j: usize) -> usize {
         let idx = self.idx(i, j);
         self.m[idx].len()
     }
 
     /// This method returns the shortest path possible between i and i.
+    #[inline]
     pub fn get_path(&self, i: usize, j: usize) -> &Path<T> {
         let idx = self.idx(i, j);
         &self.m[idx]
     }
 
     /// This method returns the shortest path possible between i and i as an iterator.
+    #[inline]
     pub fn get_path_iter<'a>(
         &'a self,
         i: usize,
@@ -127,18 +139,21 @@ impl<T> PathMatrix<T> {
     }
 
     /// If the matrix contains a path between i and j (which means, it has a set length), this returns true.
+    #[inline]
     pub fn does_path_exist(&self, i: usize, j: usize) -> bool {
         let idx = self.idx(i, j);
         self.m[idx].exists()
     }
 
     /// Returns a mutable reference to the path object for the two given nodes.
+    #[inline]
     pub(crate) fn get_path_mut(&mut self, i: usize, j: usize) -> &mut Path<T> {
         let idx = self.idx(i, j);
         &mut self.m[idx]
     }
 
     /// This method updates the value at the given position.
+    #[inline]
     pub fn set_path_len(&mut self, i: usize, j: usize, v: usize) {
         let idx = self.idx(i, j);
         self.m[idx].set_len(v);
