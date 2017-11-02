@@ -58,6 +58,19 @@ fn test_intermediate() {
     assert_eq!(m.get_path_len(0, 2), 2);
 }
 
+// #[test]
+// fn test_cache_friendliness() {
+//     use petgraph::Graph;
+
+//     let mut graph: Graph<usize, usize, _, _> = Graph::new_undirected();
+//     for i in 0..10 {
+//         graph.add_node(i);
+//     }
+//     let dists = floyd_warshall(&graph);
+
+//     println!("{:?}", dists);
+// }
+
 #[test]
 #[ignore]
 fn test_random() {

@@ -61,6 +61,7 @@ impl<T> Default for Path<T> {
 
 /// This matrix is a solution to the APSP problem, calculated by the Floyd-Warshall algorithm.
 /// It contains the intermediate nodes on the shortest path between every two nodes.
+#[derive(Debug)]
 pub struct PathMatrix<T> {
     m: Box<[Path<T>]>,
     n: usize,
@@ -71,8 +72,9 @@ impl<T> PathMatrix<T> {
     /// That means, no nodes are yet connected in this matrix.
     pub fn new(n: usize) -> PathMatrix<T> {
         let mut m = vec![];
+        let n_elems = 1 + n * (n - 1) / 2;
 
-        for _ in 0..n * n {
+        for _ in 0..n_elems {
             m.push(Path::default());
         }
 
@@ -90,7 +92,18 @@ impl<T> PathMatrix<T> {
         }
         assert!(i <= j);
 
-        i + self.n * j
+        if i == j {
+            0
+        } else {
+            // i + self.n * j // This is for the old n x n matrix.
+            // j + k + i
+            if j < 3 {
+                j + i
+            } else {
+                let k = j - 1;
+                self.idx(0, j - 1) + k + i
+            }
+        }
     }
 
     /// This method returns the value at the given position.
@@ -134,22 +147,22 @@ impl<T> PathMatrix<T> {
     }
 }
 
-impl<T> Debug for PathMatrix<T>
-where
-    T: Debug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use std::result::Result;
+// impl<T> Debug for PathMatrix<T>
+// where
+//     T: Debug,
+// {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         use std::result::Result;
 
-        for j in 0..self.n {
-            let from = j * self.n;
-            let to = j * self.n + j + 1;
-            writeln!(f, "{:?}", &self.m[from..to])?
-        }
+//         for j in 0..self.n {
+//             let from = j * self.n;
+//             let to = j * self.n + j + 1;
+//             writeln!(f, "{:?}", &self.m[from..to])?
+//         }
 
-        Result::Ok(())
-    }
-}
+//         Result::Ok(())
+//     }
+// }
 
 // /// This matrix is a solution to the APSP problem, calculated by the Floyd-Warshall algorithm. It contains the length of the shortest path for every pair of nodes in a given graph.
 // pub struct DistanceMatrix {

@@ -49,10 +49,8 @@ where
     let mut m = PathMatrix::new(g.node_count());
 
     // Each node has a distance of 0 to itself.
-    for k in g.node_identifiers() {
-        let k = k.index();
-        m.set_path_len(k, k, 0);
-    }
+    // Note, that this sets the distance of every node to itself to 0, due to the matrix representation.
+    m.set_path_len(0, 0, 0);
 
     // Update the matrix to represent the actual edges in the graph.
     for e in g.edge_references() {
